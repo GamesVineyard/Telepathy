@@ -248,6 +248,15 @@ namespace Telepathy
             // only if started
             if (Connecting || Connected)
             {
+                NetworkStream stream = state.client.GetStream();
+                byte[] payload = null;
+
+                Log.Info("Client: sending message in queue before disconnecting");
+                if (state.sendPipe.DequeueAndSerializeAll(ref payload, out int packetSize))
+                {
+                    ThreadFunctions.SendMessagesBlocking(stream, payload, packetSize);
+                }
+
                 // dispose all the state safely
                 state.Dispose();
 
